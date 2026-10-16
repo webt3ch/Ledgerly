@@ -1,24 +1,34 @@
 # Vercel deployment
 
-Ledgerly is a static frontend with optional Supabase Auth/Postgres cloud features. Vercel is the intended host. A project named `ledgerly` exists in the connected Vercel account, but the deployment API currently returns HTTP 403 for deployment creation. The repository therefore ships a GitHub Actions deployment workflow as the reliable, user-owned path.
+Ledgerly is a static frontend with optional Supabase Auth/Postgres cloud features. Vercel is the intended host. A project named `ledgerly` exists, but the connected Vercel integration returns HTTP 403 when it tries to create a deployment. No live URL is verified yet. The repository therefore contains a GitHub Actions deployment workflow as the user-owned path.
+
+## Project identifiers
+
+The Vercel project configured in this workspace is:
+
+- Project name: `ledgerly`
+- `VERCEL_ORG_ID`: `team_iw31igYiNn85F7merzqhReAl`
+- `VERCEL_PROJECT_ID`: `prj_9GJokHcNGAVNKiLlxusI1ereLd8Y`
+
+If the project is moved to another Vercel team, replace these values with the identifiers shown in that team's project settings.
 
 ## GitHub Actions deployment
 
-Workflow: `.github/workflows/deploy-vercel.yml` (runs on pushes to `main` and manual dispatch).
+Workflow: `.github/workflows/deploy-vercel.yml`. It validates the frontend and deploys prebuilt output on pushes to `main` or manual dispatch, **but only when** the repository Actions variable `VERCEL_DEPLOY_ENABLED` equals `true`.
 
 In GitHub → Settings → Secrets and variables → Actions, create these repository secrets:
 
 - `VERCEL_TOKEN`: a personal token created in Vercel by the repository owner.
-- `VERCEL_ORG_ID`: the Vercel team/account ID for the project.
-- `VERCEL_PROJECT_ID`: the project ID for `ledgerly`.
+- `VERCEL_ORG_ID`: `team_iw31igYiNn85F7merzqhReAl`
+- `VERCEL_PROJECT_ID`: `prj_9GJokHcNGAVNKiLlxusI1ereLd8Y`
 
-Find the exact `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` in the project's Vercel settings, or in `.vercel/project.json` after linking the repository locally. Never put the token into a source file, issue, README or chat.
+Then create an Actions variable named `VERCEL_DEPLOY_ENABLED` with value `true`. The Vercel token must be generated in your Vercel account and pasted directly into GitHub Secrets—never send it in chat or commit it to a file.
 
-Then run Actions → Deploy production to Vercel → Run workflow, or push a tested commit to `main`. Confirm the action succeeds and open the URL printed by the Vercel CLI. Do not declare the site public until that URL has been checked in a browser.
+Run Actions → Deploy production to Vercel → Run workflow, or push a tested commit to `main`. Confirm the action succeeds, open the URL printed by the Vercel CLI and test the live page before calling Ledgerly published.
 
 ## Supabase public frontend configuration
 
-The application uses a browser-safe `config.js`. Only the Supabase Project URL and anon/publishable key may be placed there. These values identify the public project and are not service-role credentials; database Row-Level Security is mandatory.
+The application uses a browser-safe `config.js`. Only the Supabase Project URL and anon/publishable key may be placed there. These browser values identify the public project; they are not service-role credentials. Database Row-Level Security is mandatory.
 
 - `supabaseUrl`: Supabase Project URL.
 - `supabaseAnonKey`: Supabase anon/publishable key.
@@ -31,9 +41,9 @@ The values are currently blank, so cloud auth and sync are intentionally unavail
 - Check desktop, tablet, mobile, console errors, and network failures.
 - Test email registration, email confirmation, password recovery, Google OAuth and Microsoft OAuth with real test accounts.
 - Test local-to-cloud migration with backup and confirmation.
-- Verify two-user RLS isolation, revision-conflict handling, export and cloud account deletion.
+- Verify two-user authorization/RLS isolation, revision-conflict handling, export and cloud account deletion.
 - Notifications must be called enabled only after a server scheduler/provider is set up and delivery is tested.
 
 ## Scope
 
-GitHub Pages can serve only the static UI; it does not run the backend API or a scheduled notification worker. Vercel is preferred because it can host the frontend and later server-side functions. A working deployment alone does not make OAuth, sync or notifications active.
+GitHub Pages can serve only the static UI; it does not run a backend API or scheduled notification worker. Vercel is preferred because it can host the frontend and later server-side functions. A working deployment alone does not make OAuth, sync or notifications active.
