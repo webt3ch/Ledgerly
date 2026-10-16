@@ -4,7 +4,7 @@
 
 Ledgerly is a responsive personal finance tracker for transactions, subscriptions, budgets, merchants, categories and financial analytics. The repository contains the self-contained frontend, the optional Supabase Auth/cloud-sync adapter, PostgreSQL migrations, release checks and deployment configuration.
 
-> **Release status:** Supabase is provisioned and the frontend public configuration is wired. Email/password Auth and per-user workspace sync are implemented in source but not yet end-to-end verified on a production URL. Google and Microsoft login still require provider credentials in Supabase Auth. No live Vercel deployment is verified yet.
+> **Release status:** the static app is deployed at [ledgerly-gilt-nine-25.vercel.app](https://ledgerly-gilt-nine-25.vercel.app). Supabase is provisioned and the frontend's public configuration is wired. Email/password Auth and per-user workspace sync are implemented but still require end-to-end verification on the production URL. Google and Microsoft login require provider credentials in Supabase Auth.
 
 ## Current features
 
@@ -14,7 +14,7 @@ Ledgerly is a responsive personal finance tracker for transactions, subscription
 - Local-first mode with browser storage, CSV import/export and JSON backup.
 - Supabase Auth adapter for email/password registration and sign-in, password recovery, Google OAuth, Microsoft/Azure OAuth, sign-out and per-user snapshot sync.
 - PostgreSQL migrations for profiles, notification preferences, workspace snapshots, RLS policies, safe trigger execution and least-privilege table grants.
-- Static release validation via GitHub Actions.
+- Static release validation via GitHub Actions and Git-based Vercel deployments.
 
 ## Beta visual archive
 
@@ -43,26 +43,20 @@ The Supabase project is provisioned at [Supabase Dashboard](https://supabase.com
 
 Before relying on cloud features:
 
-1. Set the final Vercel site URL and allowed redirect URLs in Supabase Auth.
+1. Set the Supabase Auth Site URL to `https://ledgerly-gilt-nine-25.vercel.app` and add the same origin to allowed redirect URLs.
 2. Enable and test email confirmation, password recovery and sign-out; configure SMTP for reliable production delivery.
 3. Create Google and Microsoft Entra OAuth clients and place their client credentials in Supabase Auth settings only.
-4. Test cross-user RLS isolation, sync conflicts and local/remote merge with disposable accounts and backup data.
+4. Test cross-user RLS isolation, sync conflicts, and local/remote merge with disposable accounts and backup data.
 
 The snapshot adapter has revision conflict checks and an explicit merge prompt. It is an initial cloud foundation, not a substitute for normalized financial tables or full concurrency/recovery testing. Never silently overwrite cloud data with local state.
 
 ## Vercel deployment
 
-A Vercel project named `ledgerly` is visible in the connected account, but its current API state reports no successful deployment or attached domain and the Vercel Git context does not yet report a linked repository. No production URL is verified. This must be resolved before calling Ledgerly published.
+Production URL: **https://ledgerly-gilt-nine-25.vercel.app**
 
-The workflow [`.github/workflows/deploy-vercel.yml`](.github/workflows/deploy-vercel.yml) is prepared but deliberately gated off until the repository owner configures the exact Vercel secrets and enables it.
+The latest observed production deployment is Ready and reports its Git source as https://github.com/webt3ch/Ledgerly, branch `main`. Pushes to `main` are deploying through Vercel's Git integration. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the project identifiers and Auth redirect configuration.
 
-In GitHub → Settings → Secrets and variables → Actions, configure repository secrets:
-
-- `VERCEL_TOKEN`: token generated in your Vercel account.
-- `VERCEL_ORG_ID`: exact Organization ID from Vercel project settings.
-- `VERCEL_PROJECT_ID`: exact Project ID from Vercel project settings.
-
-Then create the Actions variable `VERCEL_DEPLOY_ENABLED=true` only after confirming the Vercel project is correctly linked. The workflow deploys the committed static configuration and does not overwrite it with blank environment values. Keep the Vercel token in GitHub Secrets; never put it in a file or chat. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+The alternate workflow [`.github/workflows/deploy-vercel.yml`](.github/workflows/deploy-vercel.yml) is deliberately gated off. Use the native Git integration unless you intentionally choose a separately configured GitHub Actions deploy.
 
 ## Notifications
 
@@ -74,7 +68,7 @@ Browser notification permission is requested only after the user initiates the a
 - GitHub Actions quality checks run on pushes/pull requests to `main`.
 - Review [`SECURITY.md`](SECURITY.md) before deploying.
 - Do not use real bank credentials or highly sensitive financial documents in a public beta.
-- Production readiness requires verified hosting, auth callbacks, password recovery, cross-user RLS tests, backup/restore, cloud export/deletion, concurrency conflict handling and notification delivery.
+- Production readiness requires verified auth callbacks, reliable password recovery, cross-user RLS tests, backup/restore, cloud export/deletion and conflict handling.
 
 ## License
 
