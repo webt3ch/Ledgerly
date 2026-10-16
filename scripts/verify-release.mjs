@@ -13,7 +13,7 @@ assert.match(html, /id="cloudAccountButton"/, 'Cloud account entry point is requ
 assert.match(html, /signInWithPassword/, 'Email/password sign-in path must exist');
 assert.match(html, /signUp\(/, 'Email registration path must exist');
 assert.match(html, /signInWithOAuth/, 'OAuth sign-in path must exist');
-assert.match(html, /provider==='azure'/, 'Microsoft Azure provider path must exist');
+assert.match(html, /provider=action==='google'\?'google':'azure'/, 'Google and Microsoft/Azure provider paths must exist');
 assert.match(html, /workspace_snapshots/, 'Cloud workspace adapter must target the RLS-protected snapshot table');
 assert.match(html, /cloudSyncConflict/, 'Cloud write conflicts must be guarded');
 assert.match(html, /transactions:\[\],subscriptions:\[\],budgets:\[\],notifications:\[\]/, 'New workspaces must not seed financial demo records');
