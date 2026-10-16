@@ -1,6 +1,6 @@
 # Ledgerly authentication and cloud activation
 
-The Supabase project and base database schema are now provisioned. The frontend uses a browser-safe public configuration in `config.js`; this enables the Auth and snapshot-sync code path, but production behavior still requires the final Vercel origin and real provider setup/testing.
+The Supabase project and base database schema are provisioned. The frontend uses a browser-safe public configuration in `config.js`; this enables the Auth and snapshot-sync code path, but production behavior still requires the final origin configuration and real provider setup/testing.
 
 ## Current Supabase project
 
@@ -11,14 +11,15 @@ The Supabase project and base database schema are now provisioned. The frontend 
 
 ## Supabase Auth
 
-1. In **Authentication → URL Configuration**, set the Site URL to the verified Vercel production origin and add exact allowed redirect URLs for production and intended preview domains.
-2. Confirm email/password sign-up is enabled; configure email confirmation and password recovery templates. Supabase's default mail delivery is not a production email service, so configure SMTP for reliable delivery before public launch.
-3. Configure provider credentials only in **Authentication → Sign In / Providers**. The app already calls Google as `google` and Microsoft as Supabase's `azure` provider.
-4. After deployment, test sign-up, confirmation, sign-in, password recovery, sign-out, OAuth redirects and cross-device sync with disposable test accounts.
+1. In **Authentication → URL Configuration**, set the Site URL to `https://ledgerly-gilt-nine-25.vercel.app`.
+2. Add `https://ledgerly-gilt-nine-25.vercel.app/**` to allowed redirect URLs. Add preview origins only if they will be used.
+3. Confirm email/password sign-up is enabled; configure email confirmation and password recovery templates. A production SMTP provider may be needed for reliable delivery.
+4. Configure provider credentials only in **Authentication → Sign In / Providers**. The app calls Google as `google` and Microsoft as Supabase's `azure` provider.
+5. After deployment, test sign-up, confirmation, sign-in, password recovery, sign-out, OAuth redirects and cross-device sync with disposable test accounts.
 
 ## Google
 
-Create an OAuth client in Google Cloud Console and add the exact Supabase callback URI shown in the Supabase provider settings as an authorized redirect URI. Store the client secret only in Supabase provider configuration, never in GitHub or client-side JavaScript.
+Create an OAuth client in Google Cloud Console and add the exact Supabase callback URI shown in Supabase's provider settings as an authorized redirect URI. Store the client secret only in Supabase provider configuration, never in GitHub or client-side JavaScript.
 
 ## Microsoft
 
@@ -26,10 +27,10 @@ Register an application in Microsoft Entra ID, select the intended account types
 
 ## Cloud data and safety
 
-- `workspace_snapshots` stores one bounded JSON snapshot per authenticated user. RLS and database grants restrict rows and operations to the signed-in owner.
+- `workspace_snapshots` stores one bounded JSON snapshot per authenticated user. RLS and explicit database grants restrict rows and operations to the signed-in owner.
 - The adapter uses a revision check and explicit merge prompt when local and remote data both contain finance records. Do not test with real sensitive financial records.
 - Create a JSON backup before migrating valuable local data. The initial sync layer is a transitional snapshot model, not yet normalized financial tables.
-- Verify with two test users that neither can read nor overwrite the other's data. Security advisors reported no findings after hardening, but that does not replace end-to-end RLS tests.
+- Verify with two test users that neither can read nor overwrite the other's data. Supabase security advisors currently report no findings, but that does not replace end-to-end RLS tests.
 - Browser notifications are only a local permission preference. Remote email/push notifications and server-side scheduling are not active.
 
 ## Vercel runtime configuration
@@ -40,9 +41,8 @@ Never expose `SUPABASE_SERVICE_ROLE_KEY`, database passwords, OAuth client secre
 
 ## Go-live gates
 
-- A real Vercel production deployment and URL are verified.
-- Supabase Site URL and allowed redirect URLs match that actual URL.
+- Supabase Site URL and allowed redirect URLs match the real Vercel production URL.
 - Email confirmation and recovery messages are delivered reliably.
-- Google and Microsoft OAuth credentials are added and provider callbacks tested.
+- Google and Microsoft OAuth credentials are configured and their callbacks tested.
 - Two-user RLS isolation, concurrent revision conflicts, backup/restore, export/deletion and local-to-cloud merge are tested.
 - The UI makes local vs cloud-synced state clear.
