@@ -1,40 +1,40 @@
 # Ledgerly
 
-**Personal finance workspace · local-first beta · Italian / English / Spanish**
+**Personal finance workspace · local-first by default · IT / EN / ES**
 
-Ledgerly is a glassmorphism-inspired finance tracker for transactions, subscriptions, budgets, merchants, categories and personal finance analytics.
+Ledgerly is a glassmorphism-inspired personal finance tracker for transactions, subscriptions, budgets, merchants, categories and financial analytics.
 
-## Release status
+## Current release
 
-The local-first application package is prepared separately as Ledgerly 1.5.0. The GitHub repository is being initialized; the core frontend bundle has **not yet been committed to this repository** and Vercel has no successful application deployment yet.
+- `index.html`: self-contained application frontend.
+- `config.js`: intentionally blank browser-safe Supabase configuration.
+- `supabase/migrations/`: initial profile, notification preferences and RLS-protected workspace snapshot migration.
+- `docs/AUTH_SETUP.md`: setup instructions for email/password, Google and Microsoft OAuth.
+- `docs/DEPLOYMENT.md`: Vercel deployment checklist.
 
-Cloud authentication, cross-device sync and remote notifications are not active. Do not represent the current local-first application as an authenticated cloud service.
+The application works in local-first mode without backend credentials. A Cloud account action is wired into the frontend, but login and synchronization remain unavailable until a Supabase project is configured and its migration/provider settings are applied. This repository does not claim an active cloud service or a live Vercel deployment.
 
-## Release contents
+## Enable cloud sign-in and sync
 
-The intended public release has an empty financial workspace by default and stores records in the current browser. Its beta archive is restricted to historical screenshots under `beta/images/`; beta application source and seeded test finance data must not be included in the official release.
+1. Create a Supabase project.
+2. Apply `supabase/migrations/001_profile_preferences_and_workspace.sql`.
+3. Enable email/password with email verification.
+4. Enable Google and Microsoft (Azure) providers in Supabase Auth and configure the callback URLs in Google Cloud / Microsoft Entra.
+5. Fill only the public `supabaseUrl` and `supabaseAnonKey` values in `config.js`.
+6. Add the production and preview site URLs to Supabase Auth URL Configuration and redeploy.
 
-## Cloud production architecture
+Never commit Supabase service-role keys, database passwords, OAuth client secrets, email-provider keys or VAPID private keys. Google/Microsoft secrets belong only in Supabase provider settings.
 
-- Supabase Auth for email/password, Google and Microsoft identity.
-- PostgreSQL with Row-Level Security and user-scoped data access.
-- Vercel for web hosting and server-side runtime; GitHub for source control and CI.
-- Remote email and Web Push only after explicit opt-in and provider configuration.
+## Sync behavior
 
-See [Authentication setup](docs/AUTH_SETUP.md), the sample environment settings in `.env.example`, and the initial profile/preferences/sync-envelope migration in `supabase/migrations/`.
+The initial cloud adapter uses a per-user JSONB workspace snapshot protected by Row-Level Security and a revision check. Local and cloud data are not overwritten silently: if both contain financial records, Ledgerly asks before merging by record ID; concurrent cloud edits pause sync rather than blindly overwrite the remote row. Export a local backup before using the explicit cloud-reload action.
 
-## Security requirements
+This snapshot adapter is an initial cloud foundation, not a substitute for multi-device concurrency testing. Before a public production launch, run two-user RLS tests, email verification/recovery tests, OAuth callback tests, and migration/export/deletion tests.
 
-Never commit Supabase service-role keys, database passwords, OAuth client secrets, Resend API keys, or VAPID private keys. Only browser-safe Supabase URL and publishable/anon key may be exposed client-side. RLS and cross-user access tests are go-live blockers.
+## Notifications
+
+The browser permission prompt is user-initiated. Remote email/push delivery is not activated in this release; it requires a server-side scheduler/worker, a delivery provider, VAPID/email credentials and end-to-end delivery tests.
 
 ## Hosting
 
-Vercel is the intended host because Ledgerly will need more than static files once cloud authentication, data APIs and notification workers are connected. A GitHub Pages deployment would only serve the static local-first frontend.
-
-## Next release gates
-
-1. Commit the complete application source into this repository.
-2. Link the repository to Vercel and verify a successful deployment.
-3. Provision Supabase, configure email/Google/Microsoft providers, apply migrations and connect the frontend.
-4. Implement and test explicit local-to-cloud migration and per-user isolation.
-5. Enable remote notifications only after opt-in and delivery tests.
+Vercel remains the intended host for production. The current Vercel integration returned a permission error when creating a deployment, so no live deployment URL is available yet. See `docs/DEPLOYMENT.md`.
