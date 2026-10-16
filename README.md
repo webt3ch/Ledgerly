@@ -53,15 +53,15 @@ The snapshot adapter has revision conflict checks and explicit local/cloud merge
 
 ## Vercel deployment
 
-Vercel is the intended host. A Vercel project named `ledgerly` exists, but the connected management integration returned HTTP 403 for deployment creation; there is currently no verified live URL.
+Vercel is the intended host, but the connected Vercel context currently has no linked project and the management integration returns HTTP 403 for project/deployment creation. There is currently no verified live URL. Import webt3ch/Ledgerly from an account/team with permission to create projects; see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 The workflow [`.github/workflows/deploy-vercel.yml`](.github/workflows/deploy-vercel.yml) is prepared but **deliberately gated off** until the repository owner configures secrets and enables it.
 
 In GitHub → Settings → Secrets and variables → Actions, configure repository secrets:
 
 - `VERCEL_TOKEN`: token generated in your Vercel account.
-- `VERCEL_ORG_ID`: account/team ID from Vercel project settings.
-- `VERCEL_PROJECT_ID`: the Vercel project ID.
+- `VERCEL_ORG_ID`: exact Organization ID from the newly created Vercel project.
+- `VERCEL_PROJECT_ID`: exact Project ID from the newly created Vercel project.
 
 Then create these Actions variables: `VERCEL_DEPLOY_ENABLED=true`, `SUPABASE_URL` and `SUPABASE_ANON_KEY`. Leave the Supabase variables blank until you have a project; once configured, the workflow injects only these browser-public values into `config.js` before building. Never use a service-role key. Run Actions → Deploy production to Vercel, or push a tested commit to `main`. Keep the Vercel token in GitHub Secrets; never put it in a file or chat. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
