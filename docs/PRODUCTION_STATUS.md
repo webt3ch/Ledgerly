@@ -1,24 +1,39 @@
-# Production status (2026-10-16)
+# Production status — 2026-10-16
 
-## Implemented in the repository
+## Repository state
 
-- Self-contained local-first Ledgerly frontend at the root `index.html`.
+- Public GitHub repository: https://github.com/webt3ch/Ledgerly
+- Default branch: `main`
+- `index.html`: self-contained local-first Ledgerly frontend.
+- `config.js`: browser-safe Supabase configuration intentionally blank until a real project is configured.
+- `supabase/migrations/001_profile_preferences_and_workspace.sql`: initial profile/preferences/workspace migration with RLS policies; it has **not** been applied to a live Supabase project from this environment.
+- `beta/images/`: compressed visual references only. Historical beta source code and demo financial data are not included.
+- `.github/workflows/quality.yml`: static release checks.
+- `.github/workflows/deploy-vercel.yml`: production workflow is committed but gated off until repository owner configures Vercel secrets and sets `VERCEL_DEPLOY_ENABLED=true`.
+
+## Implemented in source
+
+- Self-contained local-first frontend with responsive layout, appearance settings, financial sections and IT/EN/ES UI.
 - Optional Supabase Auth adapter for email/password registration and sign-in, password recovery, Google OAuth, Microsoft/Azure OAuth and sign-out.
-- Optional workspace snapshot sync against `public.workspace_snapshots`, with user-owned RLS policies, revision checks and explicit local/cloud merge prompts.
-- Browser-safe `config.js` template with intentionally empty public values.
-- Initial Supabase migration and a GitHub Actions static quality check.
+- Optional workspace snapshot sync against `public.workspace_snapshots`, protected by user-owned RLS policies and revision checks; local/cloud merges are explicit rather than silent.
+- Browser notification permission request is user-initiated.
 
-## Not active until configured
+## Not active / not production-verified
 
-- Supabase project and migration application.
-- Email verification and recovery delivery.
-- Google OAuth client and Microsoft Entra application/provider secrets inside Supabase Auth.
-- Vercel deployment: the connected Vercel management tool currently rejects deployment creation with HTTP 403, so there is no verified live URL.
-- Remote push/email notifications and the server-side scheduler/worker.
-- Multi-user RLS tests and end-to-end provider tests against a real Supabase project.
+- Supabase project configuration and migration application.
+- Email verification and password-recovery delivery.
+- Google OAuth client and Microsoft Entra application/provider secrets in Supabase Auth.
+- Cross-user RLS and concurrent-sync testing against a real cloud project.
+- Vercel production deployment: the connected management integration returned HTTP 403 when creating a deployment, so there is no verified live URL yet.
+- Remote push/email notification delivery and a server-side scheduler/worker.
+- Full browser-to-cloud data export/deletion and end-to-end provider tests.
 
-Do not advertise cloud sign-in or sync as active until the project URL/key are configured, the migration is applied, provider callbacks work, and two separate test users pass isolation tests. Browser notification permission is distinct from remote notification delivery.
+## Exact next actions
 
-## Activating cloud auth
+1. Configure Vercel GitHub Actions repository secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`; set Actions variable `VERCEL_DEPLOY_ENABLED=true`; then run the production deployment workflow.
+2. Connect a Supabase project, apply the reviewed migration and set the public Supabase URL/key in `config.js`.
+3. Configure Google and Microsoft/Azure providers with secrets stored only in Supabase Auth settings, and set exact redirect URLs for the Vercel deployment.
+4. Test registration, email confirmation, recovery, OAuth callbacks, sign-out, two-user RLS isolation and local-to-cloud migration with real test users.
+5. Activate remote notifications only after a server scheduler/worker, delivery providers, credentials, consent, retries and end-to-end delivery tests are in place.
 
-Follow [AUTH_SETUP.md](AUTH_SETUP.md). Put only the Supabase project URL and anon/publishable key in the browser configuration. OAuth client secrets, service-role keys and database passwords must never be committed.
+Never commit service-role keys, database passwords, OAuth client secrets, mail-provider API keys or VAPID private keys. Do not advertise cloud login, sync, remote notifications or production hosting as active until they have been tested against the live services.
