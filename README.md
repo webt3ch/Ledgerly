@@ -2,9 +2,9 @@
 
 **Personal finance workspace · local-first by default · Italian / English / Spanish**
 
-Ledgerly is a glassmorphism-inspired personal finance tracker for transactions, subscriptions, budgets, merchants, categories and financial analytics. The repository contains the self-contained frontend, the optional Supabase Auth/cloud-sync adapter, the initial PostgreSQL migration, release checks and deployment configuration.
+Ledgerly is a responsive personal finance tracker for transactions, subscriptions, budgets, merchants, categories and financial analytics. The repository contains the self-contained frontend, the optional Supabase Auth/cloud-sync adapter, PostgreSQL migrations, release checks and deployment configuration.
 
-> **Release status:** public source repository; local-first app. Cloud login and sync are prepared in code but remain unavailable until a real Supabase project and providers are configured. No live Vercel deployment has been verified yet.
+> **Release status:** Supabase is provisioned and the frontend public configuration is wired. Email/password Auth and per-user workspace sync are implemented in source but not yet end-to-end verified on a production URL. Google and Microsoft login still require provider credentials in Supabase Auth. No live Vercel deployment is verified yet.
 
 ## Current features
 
@@ -12,70 +12,69 @@ Ledgerly is a glassmorphism-inspired personal finance tracker for transactions, 
 - Transactions, categories, merchants, subscriptions, budgets, calendar and analytics.
 - Italian, English and Spanish UI.
 - Local-first mode with browser storage, CSV import/export and JSON backup.
-- Optional Supabase adapter for email/password, password recovery, Google OAuth, Microsoft/Azure OAuth, profile preferences and a per-user workspace snapshot.
-- PostgreSQL migration with Row-Level Security (RLS) policies for profiles, notification preferences and workspace snapshots.
+- Supabase Auth adapter for email/password registration and sign-in, password recovery, Google OAuth, Microsoft/Azure OAuth, sign-out and per-user snapshot sync.
+- PostgreSQL migrations for profiles, notification preferences, workspace snapshots, RLS policies, safe trigger execution and least-privilege table grants.
 - Static release validation via GitHub Actions.
 
 ## Beta visual archive
 
-Only compressed visual references from earlier beta iterations are kept in `beta/images/`. The historical beta's code and sample personal/financial data are not included.
+Only compressed visual references from earlier beta iterations are kept in `beta/images/`. Historical beta source code and sample personal/financial data are not included.
 
 | Appearance | Dashboard |
 |---|---|
 | ![Beta appearance, light](beta/images/appearance-light-v1.4.webp) | ![Beta dashboard, desktop](beta/images/dashboard-desktop-v1.1.webp) |
 | ![Beta appearance, dark](beta/images/appearance-dark-v1.4.webp) | ![Beta dashboard, mobile](beta/images/dashboard-mobile-v1.1.webp) |
 
-These are reference screenshots of earlier iterations, not evidence that cloud features or a production deployment are live.
+These are reference screenshots from earlier iterations, not evidence of production behavior.
 
 ## Run locally
 
-Open `index.html` in a modern browser. The app can be used locally without backend credentials. For cloud features, configure only the public Supabase Project URL and anon/publishable key in `config.js`:
+Open `index.html` in a modern browser for local-first use. The Supabase project URL and **publishable** key are already configured in `config.js` for hosted use. They are intentionally browser-public values; Row-Level Security is mandatory. For a different Supabase project, change the two public config values, then apply all SQL migrations before enabling cloud functionality.
 
-    window.LEDGERLY_CONFIG = {
-      supabaseUrl: "https://YOUR_PROJECT.supabase.co",
-      supabaseAnonKey: "YOUR_PUBLIC_ANON_OR_PUBLISHABLE_KEY"
-    };
-
-These browser values are public configuration, not secrets; Row-Level Security is mandatory. Never store service-role keys, database passwords, OAuth client secrets, email provider API keys or VAPID private keys in frontend code or GitHub.
+Never place service-role/secret keys, database passwords, OAuth client secrets, email provider API keys or VAPID private keys in frontend code or GitHub.
 
 ## Configure cloud authentication and sync
 
-Follow [`docs/AUTH_SETUP.md`](docs/AUTH_SETUP.md) and apply [`supabase/migrations/001_profile_preferences_and_workspace.sql`](supabase/migrations/001_profile_preferences_and_workspace.sql) to the intended Supabase project before enabling cloud functionality.
+The Supabase project is provisioned at [Supabase Dashboard](https://supabase.com/dashboard/project/uqddabngitzbzqpmkquz). These migrations are applied to the live database and also versioned in this repository:
 
-1. Configure Supabase Auth email/password, email confirmation and recovery templates.
-2. Configure Google OAuth in Google Cloud and Microsoft OAuth in Microsoft Entra. Store provider secrets **inside Supabase Auth settings**, not in this repository.
-3. Add the final Vercel production URL and intended preview URLs to Supabase Auth's site/redirect URL configuration.
-4. Add the Supabase Project URL and public anon/publishable key to `config.js`.
-5. Run email verification/recovery and Google/Microsoft callback tests with real test accounts.
-6. Test row-level isolation using two independent users before relying on cloud sync.
+1. `supabase/migrations/001_profile_preferences_and_workspace.sql`
+2. `supabase/migrations/002_restrict_profile_trigger_execution.sql`
+3. `supabase/migrations/003_least_privilege_table_grants.sql`
 
-The snapshot adapter has revision conflict checks and explicit local/cloud merge prompts. It is an initial cloud foundation, not a substitute for concurrency, recovery and RLS testing. Do not silently overwrite cloud data with a local workspace.
+Before relying on cloud features:
+
+1. Set the final Vercel site URL and allowed redirect URLs in Supabase Auth.
+2. Enable and test email confirmation, password recovery and sign-out; configure SMTP for reliable production delivery.
+3. Create Google and Microsoft Entra OAuth clients and place their client credentials in Supabase Auth settings only.
+4. Test cross-user RLS isolation, sync conflicts and local/remote merge with disposable accounts and backup data.
+
+The snapshot adapter has revision conflict checks and an explicit merge prompt. It is an initial cloud foundation, not a substitute for normalized financial tables or full concurrency/recovery testing. Never silently overwrite cloud data with local state.
 
 ## Vercel deployment
 
-Vercel is the intended host, but the connected Vercel context currently has no linked project and the management integration returns HTTP 403 for project/deployment creation. There is currently no verified live URL. Import webt3ch/Ledgerly from an account/team with permission to create projects; see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+A Vercel project named `ledgerly` is visible in the connected account, but its current API state reports no successful deployment or attached domain and the Vercel Git context does not yet report a linked repository. No production URL is verified. This must be resolved before calling Ledgerly published.
 
-The workflow [`.github/workflows/deploy-vercel.yml`](.github/workflows/deploy-vercel.yml) is prepared but **deliberately gated off** until the repository owner configures secrets and enables it.
+The workflow [`.github/workflows/deploy-vercel.yml`](.github/workflows/deploy-vercel.yml) is prepared but deliberately gated off until the repository owner configures the exact Vercel secrets and enables it.
 
 In GitHub → Settings → Secrets and variables → Actions, configure repository secrets:
 
 - `VERCEL_TOKEN`: token generated in your Vercel account.
-- `VERCEL_ORG_ID`: exact Organization ID from the newly created Vercel project.
-- `VERCEL_PROJECT_ID`: exact Project ID from the newly created Vercel project.
+- `VERCEL_ORG_ID`: exact Organization ID from Vercel project settings.
+- `VERCEL_PROJECT_ID`: exact Project ID from Vercel project settings.
 
-Then create these Actions variables: `VERCEL_DEPLOY_ENABLED=true`, `SUPABASE_URL` and `SUPABASE_ANON_KEY`. Leave the Supabase variables blank until you have a project; once configured, the workflow injects only these browser-public values into `config.js` before building. Never use a service-role key. Run Actions → Deploy production to Vercel, or push a tested commit to `main`. Keep the Vercel token in GitHub Secrets; never put it in a file or chat. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+Then create the Actions variable `VERCEL_DEPLOY_ENABLED=true` only after confirming the Vercel project is correctly linked. The workflow deploys the committed static configuration and does not overwrite it with blank environment values. Keep the Vercel token in GitHub Secrets; never put it in a file or chat. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Notifications
 
-Browser notification permission is requested only after the user initiates the action. Remote push/email notifications are **not active** in this release: they require a scheduler/worker, a delivery provider, stored endpoint subscriptions/credentials, consent handling and real delivery tests.
+Browser notification permission is requested only after the user initiates the action. Remote push/email notifications are not active: they require a scheduler/worker, delivery provider, stored endpoint subscriptions/credentials, consent handling and real delivery tests.
 
 ## Quality and security
 
-- Run the current static release check with `node scripts/verify-release.mjs`.
-- The GitHub Actions quality workflow runs on pushes/pull requests to `main`.
+- Run static release validation with `node scripts/verify-release.mjs`.
+- GitHub Actions quality checks run on pushes/pull requests to `main`.
 - Review [`SECURITY.md`](SECURITY.md) before deploying.
 - Do not use real bank credentials or highly sensitive financial documents in a public beta.
-- Before calling this production-ready, verify two-user RLS isolation, auth callbacks, password recovery, local-to-cloud migration/backup, cloud export/deletion, concurrency conflicts and notification delivery.
+- Production readiness requires verified hosting, auth callbacks, password recovery, cross-user RLS tests, backup/restore, cloud export/deletion, concurrency conflict handling and notification delivery.
 
 ## License
 
