@@ -63,7 +63,7 @@ In GitHub → Settings → Secrets and variables → Actions, configure reposito
 - `VERCEL_ORG_ID`: account/team ID from Vercel project settings.
 - `VERCEL_PROJECT_ID`: the Vercel project ID.
 
-Then create the Actions variable `VERCEL_DEPLOY_ENABLED` with value `true`. Run Actions → Deploy production to Vercel, or push a tested commit to `main`. Keep the Vercel token in GitHub Secrets; never put it in a file or chat. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+Then create these Actions variables: `VERCEL_DEPLOY_ENABLED=true`, `SUPABASE_URL` and `SUPABASE_ANON_KEY`. Leave the Supabase variables blank until you have a project; once configured, the workflow injects only these browser-public values into `config.js` before building. Never use a service-role key. Run Actions → Deploy production to Vercel, or push a tested commit to `main`. Keep the Vercel token in GitHub Secrets; never put it in a file or chat. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Notifications
 
