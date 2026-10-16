@@ -14,6 +14,9 @@ concurrency:
 
 jobs:
   deploy:
+    # Keep deployment off until the repository owner configures Vercel secrets
+    # and sets the VERCEL_DEPLOY_ENABLED Actions variable to "true".
+    if: vars.VERCEL_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
     environment: production
     steps:
