@@ -28,15 +28,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Validate release
+      - name: Validate release and public Supabase config
         run: node scripts/verify-release.mjs
-
-      - name: Configure browser-safe Supabase settings
-        run: |
-          node -e "const fs=require('node:fs'); const config={supabaseUrl:process.env.SUPABASE_URL||'',supabaseAnonKey:process.env.SUPABASE_ANON_KEY||''}; fs.writeFileSync('config.js','window.LEDGERLY_CONFIG = '+JSON.stringify(config)+';\\n')"
-        env:
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
