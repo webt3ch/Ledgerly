@@ -1,6 +1,7 @@
 -- Ledgerly cloud identity/preferences and a versioned sync envelope.
--- Review and apply only to the intended Supabase project.
--- The financial UI remains local-first until a sync adapter is implemented and tested.
+-- Apply only to the intended Supabase project.
+-- workspace_snapshots backs the initial cloud sync adapter; normalize financial
+-- entities before adding shared/multi-user workspaces or bank feeds.
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -24,9 +25,8 @@ create table if not exists public.notification_preferences (
   updated_at timestamptz not null default now()
 );
 
--- Transitional sync envelope for a future explicit local-to-cloud migration.
--- The payload is not exposed to unauthenticated visitors; row-level policies enforce ownership.
--- Move to normalized financial tables before adding shared/multi-user workspaces or bank feeds.
+-- Each authenticated user's workspace is stored as one versioned snapshot.
+-- Row-level policies enforce ownership and a bounded JSON payload.
 create table if not exists public.workspace_snapshots (
   user_id uuid primary key references auth.users(id) on delete cascade,
   payload jsonb not null default '{}'::jsonb,
@@ -73,8 +73,7 @@ create policy "workspace_snapshot_update_own" on public.workspace_snapshots
   for update to authenticated using (user_id = (select auth.uid()))
   with check (user_id = (select auth.uid()));
 
--- Profile creation is triggered by Supabase Auth identity creation, without copying
--- unverified email addresses into user-editable profile fields.
+-- Profile/preferences rows are provisioned when a Supabase Auth user is created.
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
