@@ -22,7 +22,13 @@ In GitHub → Settings → Secrets and variables → Actions, create these repos
 - `VERCEL_ORG_ID`: `team_iw31igYiNn85F7merzqhReAl`
 - `VERCEL_PROJECT_ID`: `prj_9GJokHcNGAVNKiLlxusI1ereLd8Y`
 
-Then create an Actions variable named `VERCEL_DEPLOY_ENABLED` with value `true`. The Vercel token must be generated in your Vercel account and pasted directly into GitHub Secrets—never send it in chat or commit it to a file.
+Then create these Actions variables:
+
+- `VERCEL_DEPLOY_ENABLED` = `true`
+- `SUPABASE_URL` = the Supabase Project URL (leave empty until Supabase is configured).
+- `SUPABASE_ANON_KEY` = the public anon/publishable key (leave empty until Supabase is configured).
+
+The workflow writes the two Supabase values into `config.js` immediately before building the static site. They are browser-public values protected by database RLS; never substitute a service-role key. The Vercel token must be generated in your Vercel account and pasted directly into GitHub Secrets—never send it in chat or commit it to a file.
 
 Run Actions → Deploy production to Vercel → Run workflow, or push a tested commit to `main`. Confirm the action succeeds, open the URL printed by the Vercel CLI and test the live page before calling Ledgerly published.
 
