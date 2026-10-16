@@ -1,8 +1,7 @@
 /*
- * Ledgerly public configuration. Fill only with the public Supabase URL and
- * anon/publishable key from Project Settings -> API.
- * Never put service-role keys, database passwords, or OAuth client secrets here.
- * Google/Microsoft provider secrets must remain in Supabase Auth settings.
+ * Ledgerly browser-safe public configuration.
+ * Add only Supabase Project URL + anon/publishable key.
+ * Never place service-role keys, database passwords, or OAuth client secrets here.
  */
 window.LEDGERLY_CONFIG = {
   supabaseUrl: "",
